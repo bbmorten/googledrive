@@ -1,3 +1,4 @@
+
 from __future__ import print_function
 
 import os.path
@@ -8,14 +9,13 @@ from google_auth_oauthlib.flow import InstalledAppFlow
 from googleapiclient.discovery import build
 from googleapiclient.errors import HttpError
 
+import slidesnippets as snippets
+
+
 # If modifying these scopes, delete the file token.json.
 SCOPES = ['https://www.googleapis.com/auth/presentations','https://www.googleapis.com/auth/spreadsheets', 'https://www.googleapis.com/auth/drive.metadata.readonly' ]
 
-# Sharing kısmından alıyorsun.
-# https://docs.google.com/presentation/d/1j3iV397Lh12KtiTlE6ijkMK8dDfEwsP2OzAp78cWEZY/edit?usp=sharing
-# https://docs.google.com/presentation/d/1j3iV397Lh12KtiTlE6ijkMK8dDfEwsP2OzAp78cWEZY/edit?usp=sharing
-# The ID of a sample presentation.
-PRESENTATION_ID = '1j3iV397Lh12KtiTlE6ijkMK8dDfEwsP2OzAp78cWEZY'
+
 
 
 def main():
@@ -42,19 +42,27 @@ def main():
 
     try:
         service = build('slides', 'v1', credentials=creds)
+        driveservice = build('drive', 'v3', credentials=creds)
+        sheetservice = build('sheets', 'v4', credentials=creds)
 
-        # Call the Slides API
-        presentation = service.presentations().get(
-            presentationId=PRESENTATION_ID).execute()
-        slides = presentation.get('slides')
 
-        print('The presentation contains {} slides:'.format(len(slides)))
-        for i, slide in enumerate(slides):
-            print('- Slide #{} contains {} elements.'.format(
-                i + 1, len(slide.get('pageElements'))))
+
+        ss = snippets.SlidesSnippets(service,driveservice,sheetservice,creds)
+
+        presentation = ss.create_presentation('Duygu Morten Tutorial 2')
+        ss.create_slide(presentation['presentationId'], 1)
+
+        
+
+
+  
     except HttpError as err:
         print(err)
 
 
 if __name__ == '__main__':
     main()
+
+
+
+
